@@ -2,6 +2,7 @@ from typing import Union, Optional
 
 from fastapi import FastAPI
 from pydantic import BaseModel
+import uvicorn
 
 app = FastAPI()
 
@@ -39,3 +40,8 @@ async def get_specific_item(item_id : int):
 async def create_blog(blog: Blog):
 
     return {"data": f"Blog is created with title as {blog.title}!"}
+
+
+
+# if __name__ == "__main__":
+#     uvicorn.run(app, host="127.0.0.1", port=4000)
