@@ -14,8 +14,6 @@ class Blog(BaseModel):
     body: str
     published: Optional[bool]
 
-
-
 @app.get("/")
 async def index():
     return {"msg" : "hi"}
