@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, status, Form
 from pydantic import BaseModel, Field
 
 from typing import Optional
@@ -25,10 +25,19 @@ class Book(BaseModel):
             }
         }
 
+class BookNoRating(BaseModel):
+    id: UUID
+    title: str = Field(min_length=1)
+    author: str = Field(min_length=1, max_length=100)
+    description: Optional[str] = Field(min_length=1, max_length=100)
 
 
 BOOKS = []
 
+
+@app.post('/login')
+async def login(username: str = Form(), password: str = Form()):
+    return {'username': username, 'password': password}
 
 @app.get('/')
 async def read_all_books(limit: Optional[int] = None):
@@ -50,9 +59,16 @@ async def read_book(book_id: UUID):
     for x in BOOKS:
         if x.id == book_id:
             return x
-    return {'detail': 'Book not Found'}
+    raise raise_book_not_found_exception()
 
-@app.post('/')
+@app.get('/book/no-rating/{book_id}', response_model=BookNoRating)
+async def read_book(book_id: UUID):
+    for x in BOOKS:
+        if x.id == book_id:
+            return x
+    raise raise_book_not_found_exception()
+
+@app.post('/', status_code=status.HTTP_201_CREATED)
 async def create_book(book: Book):
     BOOKS.append(book)
     return book
@@ -65,7 +81,7 @@ async def update_book(book_id: UUID, book: Book):
         if x.id == book_id:
             BOOKS[counter-1] = book
             return book
-    return {'detail': 'Book not Found'}
+    raise raise_book_not_found_exception()
 
 @app.delete('/{book_id}')
 async def delete_book(book_id: UUID):
@@ -74,7 +90,7 @@ async def delete_book(book_id: UUID):
         counter += 1
         if x.id == book_id:          
             return BOOKS.pop(counter-1)
-    return {'detail': 'Book not Found'}
+    raise raise_book_not_found_exception()
 
 
 
@@ -118,3 +134,7 @@ def create_books_no_api():
 
 # creating dummy books
 create_books_no_api()
+
+
+def raise_book_not_found_exception():
+    return HTTPException(status_code=404, detail="Book Not Found")
