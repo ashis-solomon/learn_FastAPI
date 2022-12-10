@@ -32,6 +32,9 @@ class CreateUser(BaseModel):
     lastname: str
     password: str
 
+class LoginUser(BaseModel):
+    username: str
+    password: str
 
 def get_db():
     try:
@@ -73,6 +76,16 @@ def create_access_token(username: str, user_id: int, expires_delta: Optional[tim
 
     return jwt.encode(encode, SECRET_KEY, algorithm=ALGORIHTM)
 
+
+@app.post('/login/v1')
+async def login(login_user: LoginUser, db: Session = Depends(get_db)):
+    user = authenticate_user(login_user.username, login_user.password, db)
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="validation failure")
+    token = create_access_token(user.username, user.id, expires_delta=timedelta(minutes=30))
+    return {
+        'token': token
+    }
 
 @app.post('/create/user')
 async def create_new_user(create_user: CreateUser, db: Session = Depends(get_db)):
