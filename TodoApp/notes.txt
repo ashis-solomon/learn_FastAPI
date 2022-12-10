@@ -1,0 +1,8 @@
+# SQLITE
+
+.mode table
+.mode box
+
+.schema
+
+.quit
