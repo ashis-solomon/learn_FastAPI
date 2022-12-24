@@ -1,9 +1,10 @@
-from fastapi import APIRouter
-
+from fastapi import APIRouter, Depends
+from . import dependencies
 
 router = APIRouter(
     prefix="/companyapis",
     tags=["companyapis"],
+    dependencies=[Depends(dependencies.get_token_header)],
     responses={
         404: {"detail": "Not Found"}
     }
